@@ -1,0 +1,26 @@
+{
+  "name": "식물 위성 지도",
+  "short_name": "식물 지도",
+  "description": "로컬 식물 좌표를 위성 지도에 표시하고 검색하는 포터블 웹 애플리케이션",
+  "lang": "ko-KR",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#17251f",
+  "theme_color": "#0a5d43",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

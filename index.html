@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a5d43">
+  <meta name="description" content="로컬 식물 좌표를 위성 지도에 표시하는 포터블 지도">
+  <meta name="referrer" content="no-referrer">
+  <title>식물 위성 지도</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="./assets/vendor/markercluster/MarkerCluster.css">
+  <link rel="stylesheet" href="./assets/vendor/markercluster/MarkerCluster.Default.css">
+  <link rel="stylesheet" href="./assets/css/style.css">
+</head>
+<body>
+  <main class="app-shell" aria-label="식물 위성 지도 애플리케이션">
+    <div id="map" role="application" aria-label="식물 위치 위성 지도"></div>
+
+    <header class="topbar" aria-label="지도 상단 도구">
+      <button id="search-toggle" class="control-button control-button--primary" type="button"
+              aria-label="식물 검색창 열기" aria-controls="search-panel" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="control-button__text">식물 검색</span>
+      </button>
+
+      <div class="status-panel" aria-live="polite">
+        <strong id="status-count">화면 0 / 전체 0</strong>
+        <span id="status-data">데이터 확인 중</span>
+      </div>
+    </header>
+
+    <aside id="search-panel" class="search-panel" aria-label="식물 검색" hidden>
+      <div class="search-panel__header">
+        <h1>식물 검색</h1>
+        <button id="search-close" class="icon-button" type="button" aria-label="검색창 닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="search-field">
+        <label class="visually-hidden" for="search-input">국명, 학명 또는 표찰번호 검색</label>
+        <input id="search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false"
+               placeholder="국명, 학명, 표찰번호" aria-describedby="search-summary">
+        <button id="search-clear" class="icon-button" type="button" aria-label="검색어 지우기" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <p id="search-summary" class="search-summary" aria-live="polite">국명, 학명 또는 표찰번호를 입력하세요.</p>
+      <div id="search-results" class="search-results" role="listbox" aria-label="검색 결과"></div>
+    </aside>
+
+    <nav class="map-actions" aria-label="지도 빠른 동작">
+      <button id="locate-button" class="control-button" type="button" aria-label="현재 위치로 이동" title="현재 위치">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a7 7 0 1 0 7 7c0-3.87-3.13-7-7-7Zm0 0V1m0 20v2M3 10H1m22 0h-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>
+      </button>
+      <button id="fit-button" class="control-button" type="button" aria-label="전체 식물 범위 보기" title="전체 범위">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </nav>
+
+    <section id="plant-card-panel" class="plant-card-panel" aria-hidden="true" hidden>
+      <article class="plant-card" aria-labelledby="plant-card-title">
+        <div class="plant-card__header">
+          <span id="plant-card-title" class="plant-card__title">식물 정보</span>
+          <button id="plant-card-close" class="icon-button" type="button" aria-label="식물 정보 카드 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="plant-card__body">
+          <div class="plant-card__row">
+            <span class="plant-card__label">국명</span>
+            <strong id="card-common-name" class="plant-card__value">정보 없음</strong>
+          </div>
+          <div class="plant-card__row">
+            <span class="plant-card__label">학명</span>
+            <em id="card-scientific-name" class="plant-card__value">정보 없음</em>
+          </div>
+          <div class="plant-card__row">
+            <span class="plant-card__label">표찰번호</span>
+            <span id="card-origin" class="plant-card__value">정보 없음</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <aside id="tile-notice" class="tile-notice" role="status" hidden>
+      <strong>위성 지도는 인터넷 연결이 필요합니다.</strong><br>
+      식물 위치 데이터와 검색 기능은 로컬에서 사용할 수 있습니다.
+      <button id="tile-notice-close" class="icon-button" type="button" aria-label="위성 지도 안내 닫기">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <div id="loading-overlay" class="loading-overlay" role="status" aria-live="polite">
+      <div class="loading-overlay__panel">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p id="loading-text">애플리케이션을 준비하는 중입니다.</p>
+        <progress id="loading-progress" value="0" max="100" hidden></progress>
+      </div>
+    </div>
+  </main>
+
+  <noscript>이 지도는 JavaScript가 필요합니다. 브라우저에서 JavaScript를 활성화해 주세요.</noscript>
+
+  <script defer src="./assets/vendor/leaflet/leaflet.js"></script>
+  <script defer src="./assets/vendor/markercluster/leaflet.markercluster.js"></script>
+  <script defer src="./assets/js/config.js"></script>
+  <script defer src="./assets/js/utils.js"></script>
+  <script defer src="./data/plants-data.js"></script>
+  <script defer src="./assets/js/search.js"></script>
+  <script defer src="./assets/js/map.js"></script>
+  <script defer src="./assets/js/app.js"></script>
+</body>
+</html>

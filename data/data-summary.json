@@ -1,0 +1,21 @@
+{
+  "sourceFile": "필요정보.csv",
+  "detectedEncoding": "cp949",
+  "totalRows": 12142,
+  "validRows": 12142,
+  "invalidRows": 0,
+  "duplicateIdenticalRows": 0,
+  "duplicateIdenticalGroups": 0,
+  "sameCoordinateAdditionalRows": 186,
+  "sameCoordinateGroups": 186,
+  "maxPlantsAtSameCoordinate": 2,
+  "missingValues": {},
+  "containsReplacementCharacter": false,
+  "bounds": {
+    "south": 36.02657479,
+    "north": 36.04328984,
+    "west": 126.7162173,
+    "east": 126.7275372
+  },
+  "invalidRowSamples": []
+}
