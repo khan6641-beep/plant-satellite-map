@@ -67,6 +67,7 @@ window.PlantMap = window.PlantMap || {};
         removeOutsideVisibleBounds: true,
         showCoverageOnHover: false,
         spiderfyOnMaxZoom: true,
+        spiderfyDistanceMultiplier: 2,
         animate: !this.reducedMotion,
         animateAddingMarkers: false,
         iconCreateFunction: (cluster) => this.createClusterIcon(cluster)
@@ -88,16 +89,22 @@ window.PlantMap = window.PlantMap || {};
       const config = CONFIG.MAP_CONFIG;
       let tileUrl = String(config.tileUrl || "").trim();
 
-      if (tileUrl.includes("{API_KEY}")) {
-        if (!config.apiKey) {
-          this.callbacks.onError?.("위성 지도 API 키가 설정되지 않았습니다. assets/js/config.js를 확인하세요.");
+      if (tileUrl.includes("{MAPBOX_TOKEN}")) {
+        const token = String(window.MAPBOX_ACCESS_TOKEN || "").trim();
+        const placeholderToken = token.includes("여기에_") || token.includes("Mapbox_공개_토큰");
+
+        if (!token || placeholderToken || !token.startsWith("pk.")) {
+          this.callbacks.onError?.(
+            "Mapbox 공개 토큰이 설정되지 않았습니다. 프로젝트 최상단의 MAPBOX_TOKEN.js 파일에 pk.로 시작하는 토큰을 입력하세요."
+          );
           return;
         }
-        tileUrl = tileUrl.replaceAll("{API_KEY}", encodeURIComponent(config.apiKey));
+
+        tileUrl = tileUrl.replaceAll("{MAPBOX_TOKEN}", encodeURIComponent(token));
       }
 
       if (!tileUrl) {
-        this.callbacks.onError?.("위성 지도 타일 URL이 비어 있습니다. assets/js/config.js를 확인하세요.");
+        this.callbacks.onError?.("Mapbox 위성 지도 주소를 불러오지 못했습니다.");
         return;
       }
 
@@ -107,7 +114,8 @@ window.PlantMap = window.PlantMap || {};
         maxZoom: config.maxZoom,
         maxNativeZoom: config.maxNativeZoom,
         updateWhenIdle: true,
-        keepBuffer: 2
+        updateWhenZooming: false,
+        keepBuffer: 3
       });
 
       this.tileLayer.on("tileerror", () => {

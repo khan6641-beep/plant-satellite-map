@@ -1,11 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "plant-satellite-map-v1";
+const CACHE_NAME = "plant-satellite-map-mapbox-v3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./start.html",
   "./manifest.webmanifest",
+  "./MAPBOX_TOKEN.js",
   "./assets/css/style.css",
   "./assets/js/config.js",
   "./assets/js/utils.js",

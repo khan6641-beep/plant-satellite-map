@@ -1,0 +1,17 @@
+/*
+ * ================================================================
+ * 사용자가 수정할 유일한 파일입니다.
+ * ================================================================
+ *
+ * 아래 따옴표 안의 안내 문구를 지우고,
+ * Mapbox에서 발급받은 pk.로 시작하는 공개 토큰을 붙여 넣으세요.
+ *
+ * 예시 형식:
+ * window.MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijo...";
+ *
+ * 주의:
+ * - 반드시 pk.로 시작하는 공개 토큰만 사용하세요.
+ * - sk.로 시작하는 비밀 토큰은 절대로 입력하지 마세요.
+ * - GitHub Pages 주소를 Mapbox 토큰의 Allowed URLs에 등록하세요.
+ */
+window.MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoia2hhbjY2NDEiLCJhIjoiY21yZWl2aDRoMGZrdTJ5c2Nyd3V2ano1bSJ9.jQXMLS2MOYS8fIhexbNlLQ";

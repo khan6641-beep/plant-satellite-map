@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0a5d43">
   <meta name="description" content="로컬 식물 좌표를 위성 지도에 표시하는 포터블 지도">
-  <meta name="referrer" content="no-referrer">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>식물 위성 지도</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/icons/icon.svg" type="image/svg+xml">
@@ -107,6 +107,7 @@
 
   <script defer src="./assets/vendor/leaflet/leaflet.js"></script>
   <script defer src="./assets/vendor/markercluster/leaflet.markercluster.js"></script>
+  <script defer src="./MAPBOX_TOKEN.js"></script>
   <script defer src="./assets/js/config.js"></script>
   <script defer src="./assets/js/utils.js"></script>
   <script defer src="./data/plants-data.js"></script>
