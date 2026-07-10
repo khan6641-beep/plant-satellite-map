@@ -14,6 +14,7 @@ REQUIRED_FILES = [
     "index.html",
     "start.html",
     "manifest.webmanifest",
+    "MAPBOX_TOKEN.js",
     "service-worker.js",
     "README.txt",
     "TEST-RESULTS.txt",
@@ -106,7 +107,7 @@ def main() -> int:
         check((ROOT / ref.removeprefix("./")).is_file(), f"서비스 워커 캐시 파일 존재: {ref}", failures)
 
     runtime_text = "\n".join((ROOT / relative).read_text(encoding="utf-8") for relative in [
-        "index.html", "start.html", "assets/js/config.js", "assets/js/utils.js",
+        "index.html", "start.html", "MAPBOX_TOKEN.js", "assets/js/config.js", "assets/js/utils.js",
         "assets/js/search.js", "assets/js/map.js", "assets/js/app.js", "service-worker.js"
     ])
     local_absolute_patterns = [r"[A-Za-z]:\\(?:Users|Documents|Desktop)\\", r"/(?:Users|home)/[^/\s]+/"]
@@ -115,7 +116,13 @@ def main() -> int:
     app_scripts = "\n".join((ROOT / f"assets/js/{name}").read_text(encoding="utf-8") for name in ["config.js", "utils.js", "search.js", "map.js", "app.js"])
     check("fetch(" not in app_scripts, "직접 실행 앱이 식물 데이터 fetch에 의존하지 않음", failures)
     urls = re.findall(r"https?://[^\"'\s]+", app_scripts)
-    check(len(urls) == 1 and urls[0].startswith("https://server.arcgisonline.com/"), "런타임 외부 URL은 기본 위성 타일뿐", failures)
+    mapbox_urls = [url for url in urls if url.startswith("https://api.mapbox.com/")]
+    check(len(mapbox_urls) == 1 and "mapbox.satellite" in mapbox_urls[0], "런타임 외부 지도 URL은 Mapbox Satellite뿐", failures)
+
+    token_text = (ROOT / "MAPBOX_TOKEN.js").read_text(encoding="utf-8")
+    check("window.MAPBOX_ACCESS_TOKEN" in token_text, "Mapbox 토큰 전용 입력 변수 존재", failures)
+    check("sk." not in re.sub(r"/\*.*?\*/|//.*", "", token_text, flags=re.S), "실행 토큰 값에 비밀 토큰 없음", failures)
+    check("strict-origin-when-cross-origin" in index_text and "no-referrer" not in index_text, "Mapbox URL 제한용 Referrer Policy", failures)
 
     if failures:
         print(f"\n총 {len(failures)}개 항목이 실패했습니다.")

@@ -120,3 +120,22 @@
 - 홈 화면 추가/PWA
 - 비행기 모드 전환 후 로컬 UI와 검색 유지
 - 기관 방화벽에서 지도 타일 도메인 허용 여부
+
+7. Mapbox GitHub Pages 적용 수정
+-------------------------------
+[통과] 프로젝트 최상단 MAPBOX_TOKEN.js 한 파일에 사용자 입력값 분리
+[통과] MAPBOX_TOKEN.js에는 pk. 공개 토큰 문자열 한 항목만 존재
+[통과] sk. 비밀 토큰 사용 금지 안내 포함
+[통과] Mapbox Satellite Raster Tiles 공식 Leaflet 형식 적용
+[통과] Mapbox 위성 타일 최대 줌 22 적용
+[통과] 검색 결과 이동 줌을 22로 변경
+[통과] 줌 18·20·22 단계별 클러스터 반경 축소 적용
+[통과] 줌 22에서도 동일·초근접 좌표 클러스터 클릭 시 Spiderfy 적용
+[통과] 토큰 누락·안내 문구 미교체·pk. 형식 오류 사용자 안내 구현
+[통과] index.html Referrer Policy를 strict-origin-when-cross-origin으로 변경
+[통과] 서비스 워커 캐시 이름을 plant-satellite-map-mapbox-v3으로 갱신
+[통과] 서비스 워커 캐시 목록에 MAPBOX_TOKEN.js 포함
+[통과] GitHub Pages와 Mapbox Allowed URLs 실행 안내를 README에 반영
+
+주의: 실제 Mapbox 타일 응답은 사용자가 입력하는 토큰과 Allowed URLs 설정에 따라 달라지므로,
+배포 후 GitHub Pages HTTPS 주소에서 200 응답 및 줌 22 영상을 최종 확인해야 합니다.
