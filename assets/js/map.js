@@ -190,19 +190,27 @@ window.PlantMap = window.PlantMap || {};
     addMarkersInChunks() {
       return new Promise((resolve) => {
         const total = this.markers.length;
+        const previousChunkProgress = this.clusterGroup.options.chunkProgress;
         let resolved = false;
+        let initialLoadProgress = null;
+
         const finish = () => {
           if (resolved) return;
           resolved = true;
+          if (this.clusterGroup.options.chunkProgress === initialLoadProgress) {
+            this.clusterGroup.options.chunkProgress = previousChunkProgress || null;
+          }
           this.scheduleLabelUpdate();
           this.callbacks.onLoadProgress?.(total, total);
           resolve();
         };
 
-        this.clusterGroup.options.chunkProgress = (processed, chunkTotal) => {
+        initialLoadProgress = (processed, chunkTotal) => {
+          if (resolved) return;
           this.callbacks.onLoadProgress?.(processed, chunkTotal);
           if (processed >= chunkTotal) finish();
         };
+        this.clusterGroup.options.chunkProgress = initialLoadProgress;
         this.clusterGroup.addLayers(this.markers);
         if (!total) finish();
         window.setTimeout(() => {
