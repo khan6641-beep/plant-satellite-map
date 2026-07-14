@@ -39,14 +39,15 @@
         </button>
       </div>
       <div class="search-field">
-        <label class="visually-hidden" for="search-input">국명, 학명 또는 표찰번호 검색</label>
+        <label class="visually-hidden" for="search-input">국명, 학명, 표찰번호 또는 자연어 검색</label>
         <input id="search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false"
-               placeholder="국명, 학명, 표찰번호" aria-describedby="search-summary">
+               placeholder="예: 소나무 위치 보여줘, 왕벗나무" aria-describedby="search-summary search-help">
         <button id="search-clear" class="icon-button" type="button" aria-label="검색어 지우기" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <p id="search-summary" class="search-summary" aria-live="polite">국명, 학명 또는 표찰번호를 입력하세요.</p>
+      <p id="search-help" class="search-help">자연어 문장과 간단한 오탈자를 자동 보정합니다.</p>
+      <p id="search-summary" class="search-summary" aria-live="polite">국명, 학명, 표찰번호 또는 자연어로 입력하세요.</p>
       <div id="search-results" class="search-results" role="listbox" aria-label="검색 결과"></div>
     </aside>
 
@@ -67,6 +68,10 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           </button>
         </div>
+        <figure class="plant-card__media">
+          <img id="card-image" src="./assets/images/plant-placeholder.svg" alt="대표 이미지 준비 중" loading="lazy" decoding="async">
+          <figcaption id="card-image-credit" class="plant-card__credit">대표 이미지 미등록</figcaption>
+        </figure>
         <div class="plant-card__body">
           <div class="plant-card__row">
             <span class="plant-card__label">국명</span>
@@ -111,7 +116,9 @@
   <script defer src="./assets/js/config.js"></script>
   <script defer src="./assets/js/utils.js"></script>
   <script defer src="./data/plants-data.js"></script>
+  <script defer src="./data/plant-images.js"></script>
   <script defer src="./assets/js/search.js"></script>
+  <script defer src="./assets/js/images.js"></script>
   <script defer src="./assets/js/map.js"></script>
   <script defer src="./assets/js/app.js"></script>
 </body>

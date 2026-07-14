@@ -22,6 +22,7 @@ REQUIRED_FILES = [
     "assets/js/config.js",
     "assets/js/utils.js",
     "assets/js/search.js",
+    "assets/js/images.js",
     "assets/js/map.js",
     "assets/js/app.js",
     "assets/vendor/leaflet/leaflet.css",
@@ -32,11 +33,14 @@ REQUIRED_FILES = [
     "assets/icons/icon.svg",
     "assets/icons/icon-192.png",
     "assets/icons/icon-512.png",
+    "assets/images/plant-placeholder.svg",
     "data/plants.json",
     "data/plants-data.js",
+    "data/plant-images.js",
     "data/data-summary.json",
     "source/필요정보.csv",
     "tools/convert_csv.py",
+    "tools/test_search.js",
 ]
 
 
@@ -108,16 +112,21 @@ def main() -> int:
 
     runtime_text = "\n".join((ROOT / relative).read_text(encoding="utf-8") for relative in [
         "index.html", "start.html", "MAPBOX_TOKEN.js", "assets/js/config.js", "assets/js/utils.js",
-        "assets/js/search.js", "assets/js/map.js", "assets/js/app.js", "service-worker.js"
+        "assets/js/search.js", "assets/js/images.js", "assets/js/map.js", "assets/js/app.js", "service-worker.js"
     ])
     local_absolute_patterns = [r"[A-Za-z]:\\(?:Users|Documents|Desktop)\\", r"/(?:Users|home)/[^/\s]+/"]
     check(not any(re.search(pattern, runtime_text) for pattern in local_absolute_patterns), "런타임 파일에 특정 PC 절대 경로 없음", failures)
 
-    app_scripts = "\n".join((ROOT / f"assets/js/{name}").read_text(encoding="utf-8") for name in ["config.js", "utils.js", "search.js", "map.js", "app.js"])
+    app_scripts = "\n".join((ROOT / f"assets/js/{name}").read_text(encoding="utf-8") for name in ["config.js", "utils.js", "search.js", "images.js", "map.js", "app.js"])
     check("fetch(" not in app_scripts, "직접 실행 앱이 식물 데이터 fetch에 의존하지 않음", failures)
     urls = re.findall(r"https?://[^\"'\s]+", app_scripts)
     mapbox_urls = [url for url in urls if url.startswith("https://api.mapbox.com/")]
     check(len(mapbox_urls) == 1 and "mapbox.satellite" in mapbox_urls[0], "런타임 외부 지도 URL은 Mapbox Satellite뿐", failures)
+
+
+    check("searchDetailed" in (ROOT / "assets/js/search.js").read_text(encoding="utf-8"), "자연어·오탈자 상세 검색 구현", failures)
+    check("window.PLANT_IMAGE_MAP" in (ROOT / "data/plant-images.js").read_text(encoding="utf-8"), "대표 이미지 매핑 파일 구현", failures)
+    check("card-image" in index_text, "식물 정보 카드 대표 이미지 영역 구현", failures)
 
     token_text = (ROOT / "MAPBOX_TOKEN.js").read_text(encoding="utf-8")
     check("window.MAPBOX_ACCESS_TOKEN" in token_text, "Mapbox 토큰 전용 입력 변수 존재", failures)

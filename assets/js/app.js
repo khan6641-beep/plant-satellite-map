@@ -40,6 +40,8 @@ window.PlantMap = window.PlantMap || {};
       cardCommon: byId("card-common-name"),
       cardScientific: byId("card-scientific-name"),
       cardOrigin: byId("card-origin"),
+      cardImage: byId("card-image"),
+      cardImageCredit: byId("card-image-credit"),
       toast: byId("toast"),
       tileNotice: byId("tile-notice"),
       tileNoticeClose: byId("tile-notice-close")
@@ -96,7 +98,7 @@ window.PlantMap = window.PlantMap || {};
   function clearSearch() {
     state.elements.searchInput.value = "";
     state.elements.searchResults.replaceChildren();
-    state.elements.searchSummary.textContent = "국명, 학명 또는 표찰번호를 입력하세요.";
+    state.elements.searchSummary.textContent = "국명, 학명, 표찰번호 또는 자연어로 입력하세요.";
     state.elements.searchClear.hidden = true;
     state.mapController?.setSearchIndex(null);
     state.elements.searchInput.focus();
@@ -136,20 +138,32 @@ window.PlantMap = window.PlantMap || {};
     state.elements.searchResults.replaceChildren();
 
     if (!trimmed) {
-      state.elements.searchSummary.textContent = "국명, 학명 또는 표찰번호를 입력하세요.";
+      state.elements.searchSummary.textContent = "국명, 학명, 표찰번호 또는 자연어로 입력하세요.";
       state.mapController?.setSearchIndex(null);
       return;
     }
 
-    const indexes = state.searchIndex.search(trimmed, config.SEARCH_CONFIG.resultLimit);
+    const result = state.searchIndex.searchDetailed(trimmed, config.SEARCH_CONFIG.resultLimit);
+    const indexes = result.indexes;
     if (!indexes.length) {
-      state.elements.searchSummary.textContent = "검색 결과가 없습니다.";
+      const suggestion = result.corrections.length
+        ? ` “${result.corrections.map((item) => item.to).join(" ")}”도 확인했지만 일치하는 식물이 없습니다.`
+        : "";
+      state.elements.searchSummary.textContent = `검색 결과가 없습니다.${suggestion}`;
       return;
     }
 
-    state.elements.searchSummary.textContent = indexes.length >= config.SEARCH_CONFIG.resultLimit
-      ? `상위 ${formatNumber(indexes.length)}개 결과를 표시합니다.`
+    const countText = indexes.length >= config.SEARCH_CONFIG.resultLimit
+      ? `상위 ${formatNumber(indexes.length)}개 결과`
       : `${formatNumber(indexes.length)}개 결과`;
+    if (result.mode === "fuzzy") {
+      const correctionText = result.corrections.map((item) => `“${item.from}”→“${item.to}”`).join(", ");
+      state.elements.searchSummary.textContent = `${correctionText}로 보정 · ${countText}`;
+    } else if (result.mode === "natural") {
+      state.elements.searchSummary.textContent = `“${result.interpretedQuery}”로 해석 · ${countText}`;
+    } else {
+      state.elements.searchSummary.textContent = countText;
+    }
 
     const fragment = document.createDocumentFragment();
     for (const index of indexes) fragment.append(createResultItem(state.plants[index], index));
@@ -162,6 +176,15 @@ window.PlantMap = window.PlantMap || {};
     state.elements.cardCommon.textContent = safeText(plant.commonName);
     state.elements.cardScientific.textContent = scientificName(plant);
     state.elements.cardOrigin.textContent = safeText(plant.origin);
+
+    const image = namespace.PlantImages.resolve(plant);
+    state.elements.cardImage.dataset.fallbackApplied = image.isFallback ? "true" : "false";
+    state.elements.cardImage.src = image.src;
+    state.elements.cardImage.alt = image.alt;
+    const creditParts = [image.credit, image.license].filter(Boolean);
+    state.elements.cardImageCredit.textContent = creditParts.join(" · ") || "대표 이미지";
+    state.elements.cardImageCredit.hidden = !creditParts.length;
+
     state.elements.card.hidden = false;
     state.elements.card.setAttribute("aria-hidden", "false");
     document.querySelector(".app-shell")?.classList.add("card-open");
@@ -238,6 +261,15 @@ window.PlantMap = window.PlantMap || {};
     state.elements.locateButton.addEventListener("click", () => state.mapController.locateUser());
     state.elements.fitButton.addEventListener("click", () => state.mapController.showAll());
     state.elements.cardClose.addEventListener("click", () => state.mapController.clearSelection());
+    state.elements.cardImage.addEventListener("error", () => {
+      if (state.elements.cardImage.dataset.fallbackApplied === "true") return;
+      const fallback = namespace.PlantImages.fallback();
+      state.elements.cardImage.dataset.fallbackApplied = "true";
+      state.elements.cardImage.src = fallback.src;
+      state.elements.cardImage.alt = fallback.alt;
+      state.elements.cardImageCredit.textContent = fallback.credit;
+      state.elements.cardImageCredit.hidden = false;
+    });
     state.elements.tileNoticeClose.addEventListener("click", hideTileNotice);
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !state.elements.card.hidden) state.mapController.clearSelection();

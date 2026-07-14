@@ -38,7 +38,7 @@ window.PlantMap.CONFIG = Object.freeze({
   SEARCH_CONFIG: Object.freeze({
     resultLimit: 100,
     moveZoom: 22,
-    debounceMs: 120
+    debounceMs: 160
   }),
 
   CLUSTER_CONFIG: Object.freeze({

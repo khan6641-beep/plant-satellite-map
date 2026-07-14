@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" role="img" aria-labelledby="title desc">
+  <title id="title">식물 대표 이미지 준비 중</title>
+  <desc id="desc">잎사귀 모양의 기본 대체 이미지</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e9f4ed"/>
+      <stop offset="1" stop-color="#b8d7c2"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/>
+  <circle cx="400" cy="205" r="116" fill="#ffffff" opacity=".62"/>
+  <path d="M401 293c-9-76 13-144 77-202 8 83-18 151-77 202Z" fill="#2e7d59"/>
+  <path d="M399 292c-4-69-32-126-91-170 1 76 30 133 91 170Z" fill="#4f9b72"/>
+  <path d="M399 297V176" stroke="#174b35" stroke-width="12" stroke-linecap="round"/>
+  <text x="400" y="382" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" font-weight="700" fill="#174b35">대표 이미지 준비 중</text>
+</svg>
