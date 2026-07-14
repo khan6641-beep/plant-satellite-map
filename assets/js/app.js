@@ -3,7 +3,7 @@ window.PlantMap = window.PlantMap || {};
 (function (namespace) {
   "use strict";
 
-  const { formatNumber, safeText, scientificName, debounce } = namespace.Utils;
+  const { formatNumber, safeText, scientificName } = namespace.Utils;
   const config = namespace.CONFIG;
 
   const state = {
@@ -29,8 +29,11 @@ window.PlantMap = window.PlantMap || {};
       searchToggle: byId("search-toggle"),
       searchPanel: byId("search-panel"),
       searchClose: byId("search-close"),
+      searchForm: byId("search-form"),
       searchInput: byId("search-input"),
       searchClear: byId("search-clear"),
+      searchSubmit: byId("search-submit"),
+      searchReset: byId("search-reset"),
       searchSummary: byId("search-summary"),
       searchResults: byId("search-results"),
       locateButton: byId("locate-button"),
@@ -100,7 +103,8 @@ window.PlantMap = window.PlantMap || {};
     state.elements.searchResults.replaceChildren();
     state.elements.searchSummary.textContent = "국명, 학명, 표찰번호 또는 자연어로 입력하세요.";
     state.elements.searchClear.hidden = true;
-    state.mapController?.setSearchIndex(null);
+    state.elements.searchReset.disabled = true;
+    state.mapController?.resetSearchResults();
     state.elements.searchInput.focus();
   }
 
@@ -132,42 +136,56 @@ window.PlantMap = window.PlantMap || {};
     return button;
   }
 
-  function renderSearchResults(query) {
+  function renderSearchResults(query, applyMapFilter = false) {
     const trimmed = query.trim();
     state.elements.searchClear.hidden = !trimmed;
     state.elements.searchResults.replaceChildren();
 
     if (!trimmed) {
-      state.elements.searchSummary.textContent = "국명, 학명, 표찰번호 또는 자연어로 입력하세요.";
-      state.mapController?.setSearchIndex(null);
+      clearSearch();
       return;
     }
 
-    const result = state.searchIndex.searchDetailed(trimmed, config.SEARCH_CONFIG.resultLimit);
+    const result = state.searchIndex.searchDetailed(trimmed, Number.MAX_SAFE_INTEGER);
     const indexes = result.indexes;
+    state.elements.searchReset.disabled = false;
+
+    if (applyMapFilter) state.mapController?.setSearchResults(indexes);
+
     if (!indexes.length) {
       const suggestion = result.corrections.length
         ? ` “${result.corrections.map((item) => item.to).join(" ")}”도 확인했지만 일치하는 식물이 없습니다.`
         : "";
-      state.elements.searchSummary.textContent = `검색 결과가 없습니다.${suggestion}`;
+      state.elements.searchSummary.textContent = `검색 결과가 없습니다.${suggestion} 초기화하면 전체 식물을 다시 볼 수 있습니다.`;
       return;
     }
 
-    const countText = indexes.length >= config.SEARCH_CONFIG.resultLimit
-      ? `상위 ${formatNumber(indexes.length)}개 결과`
+    const displayIndexes = indexes.slice(0, config.SEARCH_CONFIG.resultLimit);
+    const countText = indexes.length > displayIndexes.length
+      ? `전체 ${formatNumber(indexes.length)}개 중 상위 ${formatNumber(displayIndexes.length)}개 결과`
       : `${formatNumber(indexes.length)}개 결과`;
+    const filterText = applyMapFilter ? " · 지도에 검색 결과만 표시" : "";
     if (result.mode === "fuzzy") {
       const correctionText = result.corrections.map((item) => `“${item.from}”→“${item.to}”`).join(", ");
-      state.elements.searchSummary.textContent = `${correctionText}로 보정 · ${countText}`;
+      state.elements.searchSummary.textContent = `${correctionText}로 보정 · ${countText}${filterText}`;
     } else if (result.mode === "natural") {
-      state.elements.searchSummary.textContent = `“${result.interpretedQuery}”로 해석 · ${countText}`;
+      state.elements.searchSummary.textContent = `“${result.interpretedQuery}”로 해석 · ${countText}${filterText}`;
     } else {
-      state.elements.searchSummary.textContent = countText;
+      state.elements.searchSummary.textContent = `${countText}${filterText}`;
     }
 
     const fragment = document.createDocumentFragment();
-    for (const index of indexes) fragment.append(createResultItem(state.plants[index], index));
+    for (const index of displayIndexes) fragment.append(createResultItem(state.plants[index], index));
     state.elements.searchResults.append(fragment);
+  }
+
+  function submitSearch() {
+    const query = state.elements.searchInput.value;
+    if (!query.trim()) {
+      clearSearch();
+      return;
+    }
+    renderSearchResults(query, true);
   }
 
   function showPlantCard(index) {
@@ -196,8 +214,9 @@ window.PlantMap = window.PlantMap || {};
     document.querySelector(".app-shell")?.classList.remove("card-open");
   }
 
-  function updateStatus(visible, total) {
-    state.elements.statusCount.textContent = `화면 ${formatNumber(visible)} / 전체 ${formatNumber(total)}`;
+  function updateStatus(visible, total, filtered = false) {
+    const scope = filtered ? "검색" : "전체";
+    state.elements.statusCount.textContent = `화면 ${formatNumber(visible)} / ${scope} ${formatNumber(total)}`;
   }
 
   function validateData() {
@@ -233,10 +252,16 @@ window.PlantMap = window.PlantMap || {};
     });
     state.elements.searchClose.addEventListener("click", closeSearch);
     state.elements.searchClear.addEventListener("click", clearSearch);
-    state.elements.searchInput.addEventListener("input", debounce(
-      (event) => renderSearchResults(event.target.value),
-      config.SEARCH_CONFIG.debounceMs
-    ));
+    state.elements.searchReset.addEventListener("click", clearSearch);
+    state.elements.searchForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      submitSearch();
+    });
+    state.elements.searchInput.addEventListener("input", (event) => {
+      const hasQuery = Boolean(event.target.value.trim());
+      state.elements.searchClear.hidden = !hasQuery;
+      if (!hasQuery) clearSearch();
+    });
     state.elements.searchInput.addEventListener("keydown", (event) => {
       if (event.key === "Escape") closeSearch();
       if (event.key === "ArrowDown") {

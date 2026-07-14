@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "plant-satellite-map-mapbox-v4";
+const CACHE_NAME = "plant-satellite-map-mapbox-v5";
 const CORE_ASSETS = [
   "./",
   "./index.html",

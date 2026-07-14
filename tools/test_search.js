@@ -23,6 +23,9 @@ function firstPlant(query) {
 
 assert.strictEqual(firstPlant("참느릅나무").plant.commonName, "참느릅나무");
 assert.strictEqual(firstPlant("참느릅나무 어디 있어?").plant.commonName, "참느릅나무");
+assert.strictEqual(firstPlant("산뽕나무 어딨어?").plant.commonName, "산뽕나무");
+assert.strictEqual(firstPlant("산뽕나무는 어딨나요?").plant.commonName, "산뽕나무");
+assert.strictEqual(firstPlant("산뽕나무 어디에 있어요?").plant.commonName, "산뽕나무");
 assert.strictEqual(firstPlant("무궁화를 찾아줘").plant.commonName, "무궁화");
 assert.strictEqual(firstPlant("표찰번호 12-L-00001 찾아줘").plant.origin, "12-L-00001");
 assert.strictEqual(firstPlant("왕벗나무").plant.commonName, "왕벚나무");

@@ -14,4 +14,4 @@
  * - sk.로 시작하는 비밀 토큰은 절대로 입력하지 마세요.
  * - GitHub Pages 주소를 Mapbox 토큰의 Allowed URLs에 등록하세요.
  */
-window.MAPBOX_ACCESS_TOKEN = "여기에_pk.로_시작하는_Mapbox_공개_토큰을_입력하세요";
+window.MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoia2hhbjY2NDEiLCJhIjoiY21yZWl2aDRoMGZrdTJ5c2Nyd3V2ano1bSJ9.jQXMLS2MOYS8fIhexbNlLQ";

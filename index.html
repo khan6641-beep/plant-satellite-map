@@ -38,15 +38,21 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
-      <div class="search-field">
-        <label class="visually-hidden" for="search-input">국명, 학명, 표찰번호 또는 자연어 검색</label>
-        <input id="search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false"
-               placeholder="예: 소나무 위치 보여줘, 왕벗나무" aria-describedby="search-summary search-help">
-        <button id="search-clear" class="icon-button" type="button" aria-label="검색어 지우기" hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-      <p id="search-help" class="search-help">자연어 문장과 간단한 오탈자를 자동 보정합니다.</p>
+      <form id="search-form" class="search-form" role="search">
+        <div class="search-field">
+          <label class="visually-hidden" for="search-input">국명, 학명, 표찰번호 또는 자연어 검색</label>
+          <input id="search-input" type="search" inputmode="search" autocomplete="off" spellcheck="false"
+                 placeholder="예: 산뽕나무 어딨어?, 왕벗나무" aria-describedby="search-summary search-help">
+          <button id="search-clear" class="icon-button" type="button" aria-label="검색어 지우기" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="search-actions">
+          <button id="search-submit" class="search-action search-action--primary" type="submit">검색</button>
+          <button id="search-reset" class="search-action" type="button" disabled>초기화</button>
+        </div>
+      </form>
+      <p id="search-help" class="search-help">검색어를 입력하고 Enter를 누르세요. 자연어 문장과 간단한 오탈자를 자동 보정합니다.</p>
       <p id="search-summary" class="search-summary" aria-live="polite">국명, 학명, 표찰번호 또는 자연어로 입력하세요.</p>
       <div id="search-results" class="search-results" role="listbox" aria-label="검색 결과"></div>
     </aside>

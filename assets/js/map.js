@@ -24,6 +24,8 @@ window.PlantMap = window.PlantMap || {};
       this.bounds = null;
       this.selectedIndex = null;
       this.searchIndex = null;
+      this.filteredIndexes = null;
+      this.allIndexes = plants.map((_, index) => index);
       this.locationMarker = null;
       this.locationAccuracy = null;
       this.tileErrorCount = 0;
@@ -223,14 +225,62 @@ window.PlantMap = window.PlantMap || {};
     }
 
     showAll() {
-      if (this.bounds?.isValid()) {
-        this.map.fitBounds(this.bounds, { padding: [30, 30], animate: !this.reducedMotion });
+      const activeIndexes = this.getActiveIndexes();
+      const targetBounds = this.filteredIndexes === null
+        ? this.bounds
+        : L.latLngBounds(activeIndexes.map((index) => this.markers[index].getLatLng()));
+      if (targetBounds?.isValid()) {
+        this.map.fitBounds(targetBounds, { padding: [30, 30], maxZoom: 20, animate: !this.reducedMotion });
       }
+    }
+
+    getActiveIndexes() {
+      return this.filteredIndexes ?? this.allIndexes;
     }
 
     setSearchIndex(index) {
       this.searchIndex = Number.isInteger(index) ? index : null;
       this.scheduleLabelUpdate();
+    }
+
+    setSearchResults(indexes) {
+      if (!this.clusterGroup || !this.map) return;
+      const uniqueIndexes = Array.from(new Set(indexes))
+        .filter((index) => Number.isInteger(index) && index >= 0 && index < this.markers.length);
+      const activeSet = new Set(uniqueIndexes);
+
+      if (this.selectedIndex !== null && !activeSet.has(this.selectedIndex)) this.clearSelection();
+      this.filteredIndexes = uniqueIndexes;
+      this.searchIndex = uniqueIndexes.length === 1 ? uniqueIndexes[0] : null;
+      this.clusterGroup.clearLayers();
+      if (uniqueIndexes.length) this.clusterGroup.addLayers(uniqueIndexes.map((index) => this.markers[index]));
+
+      this.labelLayer?.clearLayers();
+      this.scheduleLabelUpdate();
+      this.updateVisibleCount();
+
+      if (!uniqueIndexes.length) return;
+      const resultBounds = L.latLngBounds(uniqueIndexes.map((index) => this.markers[index].getLatLng()));
+      if (uniqueIndexes.length === 1) {
+        this.map.setView(resultBounds.getCenter(), Math.min(20, this.map.getMaxZoom()), { animate: !this.reducedMotion });
+      } else {
+        this.map.fitBounds(resultBounds, { padding: [34, 34], maxZoom: 20, animate: !this.reducedMotion });
+      }
+    }
+
+    resetSearchResults() {
+      if (!this.clusterGroup || !this.map || this.filteredIndexes === null) {
+        this.setSearchIndex(null);
+        return;
+      }
+      this.filteredIndexes = null;
+      this.searchIndex = null;
+      this.clusterGroup.clearLayers();
+      this.clusterGroup.addLayers(this.markers);
+      this.labelLayer?.clearLayers();
+      this.showAll();
+      this.scheduleLabelUpdate();
+      this.updateVisibleCount();
     }
 
     focusPlant(index) {
@@ -292,11 +342,13 @@ window.PlantMap = window.PlantMap || {};
     updateVisibleCount() {
       if (!this.map) return;
       const bounds = this.map.getBounds();
+      const activeIndexes = this.getActiveIndexes();
       let visible = 0;
-      for (const plant of this.plants) {
+      for (const index of activeIndexes) {
+        const plant = this.plants[index];
         if (bounds.contains([plant.latitude, plant.longitude])) visible += 1;
       }
-      this.callbacks.onVisibleCount?.(visible, this.plants.length);
+      this.callbacks.onVisibleCount?.(visible, activeIndexes.length, this.filteredIndexes !== null);
     }
 
     updateLabels() {
@@ -309,7 +361,7 @@ window.PlantMap = window.PlantMap || {};
       const centerPoint = this.map.latLngToContainerPoint(this.map.getCenter());
       const candidates = [];
 
-      for (let index = 0; index < this.plants.length; index += 1) {
+      for (const index of this.getActiveIndexes()) {
         const plant = this.plants[index];
         if (!mapBounds.contains([plant.latitude, plant.longitude])) continue;
         const marker = this.markers[index];
