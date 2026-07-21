@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "plant-satellite-map-mapbox-v6";
+const CACHE_NAME = "plant-satellite-map-mapbox-v6-images-20260721";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -29,7 +29,7 @@ const CORE_ASSETS = [
   "./assets/icons/icon-512.png",
   "./assets/images/plant-placeholder.svg",
   "./data/plants-data.js",
-  "./data/plant-images.js",
+  "./data/plant-images.js?v=20260721",
   "./data/plants.json",
   "./data/data-summary.json",
   "./README.txt",
